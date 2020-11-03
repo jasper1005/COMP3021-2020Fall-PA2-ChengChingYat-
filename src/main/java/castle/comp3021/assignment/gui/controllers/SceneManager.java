@@ -68,6 +68,11 @@ public class SceneManager {
      */
     private SceneManager() {
         //TODO
+        mainMenuScene.getStylesheets().add(SceneManager.class.getResource("/assets/styles/styles.css").toExternalForm());
+        settingsScene.getStylesheets().add(SceneManager.class.getResource("/assets/styles/styles.css").toExternalForm());
+        validationScene.getStylesheets().add(SceneManager.class.getResource("/assets/styles/styles.css").toExternalForm());
+        gameplayScene.getStylesheets().add(SceneManager.class.getResource("/assets/styles/styles.css").toExternalForm());
+        settingEditorScene.getStylesheets().add(SceneManager.class.getResource("/assets/styles/styles.css").toExternalForm());
     }
 
     /**
