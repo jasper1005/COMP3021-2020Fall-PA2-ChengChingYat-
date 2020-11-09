@@ -68,11 +68,12 @@ public class SceneManager {
      */
     private SceneManager() {
         //TODO
-        mainMenuScene.getStylesheets().add(SceneManager.class.getResource("/assets/styles/styles.css").toExternalForm());
-        settingsScene.getStylesheets().add(SceneManager.class.getResource("/assets/styles/styles.css").toExternalForm());
-        validationScene.getStylesheets().add(SceneManager.class.getResource("/assets/styles/styles.css").toExternalForm());
-        gameplayScene.getStylesheets().add(SceneManager.class.getResource("/assets/styles/styles.css").toExternalForm());
-        settingEditorScene.getStylesheets().add(SceneManager.class.getResource("/assets/styles/styles.css").toExternalForm());
+        var cssUrl = "file:///" + ViewConfig.CSS_STYLES_PATH;
+        mainMenuScene.getStylesheets().add("file:///" + ViewConfig.CSS_STYLES_PATH);
+        settingsScene.getStylesheets().add("file:///" + ViewConfig.CSS_STYLES_PATH);
+        gameplayScene.getStylesheets().add("file:///" + ViewConfig.CSS_STYLES_PATH);
+        settingEditorScene.getStylesheets().add("file:///" + ViewConfig.CSS_STYLES_PATH);
+        validationScene.getStylesheets().add("file:///" + ViewConfig.CSS_STYLES_PATH);
     }
 
     /**
@@ -116,6 +117,10 @@ public class SceneManager {
      */
     public void showPane(@NotNull final Class<? extends BasePane> pane) {
         //TODO
+        Scene scene = scenes.get(pane);
+        if(scene == null)
+            throw new IllegalArgumentException("illegal argument exception");
+        showScene(scene);
     }
 
     /**

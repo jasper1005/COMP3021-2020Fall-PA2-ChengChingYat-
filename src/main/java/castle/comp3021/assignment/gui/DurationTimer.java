@@ -59,6 +59,14 @@ public class DurationTimer {
      */
     void start() {
         //TODO
+        flowTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                for(var callback : onTickCallbacks) {
+                    callback.run();
+                }
+            }
+        },0,1);
     }
 
     /**
@@ -66,6 +74,7 @@ public class DurationTimer {
      */
     void stop() {
         //TODO
+        flowTimer.cancel();
     }
 
 }

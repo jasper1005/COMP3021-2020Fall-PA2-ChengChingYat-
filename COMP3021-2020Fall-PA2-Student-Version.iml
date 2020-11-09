@@ -23,5 +23,6 @@
         <jarDirectory url="file://$MODULE_DIR$/javafx-sdk-15-osx/lib" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="javafx-sdk-15-osx" level="project" />
   </component>
 </module>
