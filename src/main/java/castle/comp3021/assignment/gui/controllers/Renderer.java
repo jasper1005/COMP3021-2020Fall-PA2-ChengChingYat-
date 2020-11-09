@@ -74,6 +74,12 @@ public class Renderer {
      */
     public static void renderChessBoard(@NotNull Canvas canvas, int boardSize, Place centerPlace){
         //TODO
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        for(int x = 0;x<boardSize;++x) {
+            for (int y = 0; y < boardSize; ++y) {
+                gc.fillRect(0, 100, 100, 100);
+            }
+        }
     }
 
     /**

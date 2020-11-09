@@ -29,6 +29,8 @@ public class FXJesonMor extends JesonMor {
      */
     public FXJesonMor(Configuration configuration){
         //TODO
+        super(configuration);
+        durationTimer = new DurationTimer();
     }
 
     /**
@@ -39,6 +41,8 @@ public class FXJesonMor extends JesonMor {
      */
     public void renderBoard(@NotNull Canvas canvas){
         //TODO
+        Renderer.renderChessBoard(canvas,configuration.getSize(),configuration.getCentralPlace());
+        Renderer.renderPieces(canvas,configuration.getInitialBoard());
     }
 
     /**
@@ -93,5 +97,9 @@ public class FXJesonMor extends JesonMor {
 
         // update score to 2 properties
         // TODO: update scorePlayer1Property and scorePlayer2Property
+        if(player == configuration.getPlayers()[0])
+            scorePlayer1Property.set(newScore);
+        else
+            scorePlayer2Property.set(newScore);
     }
 }

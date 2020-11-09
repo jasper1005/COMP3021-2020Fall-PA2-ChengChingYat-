@@ -28,6 +28,8 @@ public class GameplayInfoPane extends BigVBox {
     public GameplayInfoPane(IntegerProperty score1Property, IntegerProperty score2Property, StringProperty curPlayer,
                             IntegerProperty ticksElapsed) {
         //TODO
+        bindTo(score1Property,score2Property,curPlayer,ticksElapsed);
+        getChildren().addAll(score1Label,score2Label,curPlayerLabel,timerLabel);
     }
 
     /**
@@ -69,5 +71,9 @@ public class GameplayInfoPane extends BigVBox {
     private void bindTo(IntegerProperty score1Property, IntegerProperty score2Property, StringProperty curPlayer,
                         IntegerProperty ticksElapsed) {
         // TODO
+        score1Label.textProperty().bind(score1Property.asString());
+        score2Label.textProperty().bind(score2Property.asString());
+        curPlayerLabel.textProperty().bind(curPlayer);
+        timerLabel.textProperty().bind(ticksElapsed.asString());
     }
 }
