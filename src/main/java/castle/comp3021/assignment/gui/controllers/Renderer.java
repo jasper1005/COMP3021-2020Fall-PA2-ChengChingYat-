@@ -1,10 +1,12 @@
 package castle.comp3021.assignment.gui.controllers;
 
+import castle.comp3021.assignment.gui.ViewConfig;
 import castle.comp3021.assignment.protocol.Piece;
 import castle.comp3021.assignment.protocol.Place;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 import org.jetbrains.annotations.NotNull;
 
 
@@ -50,7 +52,8 @@ public class Renderer {
      * @param y     Y-coordinate relative to the graphics context to draw the oval.
      */
     public static void drawOval(@NotNull GraphicsContext gc, double x, double y) {
-        // TODO
+        gc.setFill(Color.rgb(255, 255, 220));
+        gc.fillOval(x,y,12,12);
     }
 
     /**
@@ -61,7 +64,8 @@ public class Renderer {
      * @param y Y-coordinate relative to the graphics context to draw the rectangle.
      */
     public static void drawRectangle(@NotNull GraphicsContext gc, double x, double y){
-        //TODO
+        gc.setFill(Color.rgb(255, 255, 220));
+        gc.fillRect(x* ViewConfig.PIECE_SIZE,y*ViewConfig.PIECE_SIZE,ViewConfig.PIECE_SIZE,ViewConfig.PIECE_SIZE);
     }
 
     /**
@@ -73,11 +77,11 @@ public class Renderer {
      * @param centerPlace the central place
      */
     public static void renderChessBoard(@NotNull Canvas canvas, int boardSize, Place centerPlace){
-        //TODO
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        for(int x = 0;x<boardSize;++x) {
-            for (int y = 0; y < boardSize; ++y) {
-                gc.fillRect(0, 100, 100, 100);
+        Image images[] = {ResourceLoader.getImage('l'),ResourceLoader.getImage('d')};
+        for(int x = 0;x<boardSize;++x){
+            for(int y=0;y<boardSize;++y) {
+                gc.drawImage(images[(x+y)%2], y*ViewConfig.PIECE_SIZE,x*ViewConfig.PIECE_SIZE);
             }
         }
     }
@@ -88,7 +92,23 @@ public class Renderer {
      * @param board board with pieces
      */
     public static void renderPieces(@NotNull Canvas canvas, @NotNull Piece[][] board) {
-        //TODO
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        Image center = ResourceLoader.getImage('c');
+        for(int i = 0; i < board.length; ++i) {
+            for(int j = 0;j < board[i].length; ++j) {
+                if(board[i][j] != null ) {
+                    char character = board[i][j].getLabel();
+                    if(board[i][j].getPlayer().getName().equals("Black"))
+                        character += 32;
+
+                    Image image = ResourceLoader.getImage(character);
+                    if(image != null) {
+                        gc.drawImage(image,ViewConfig.PIECE_SIZE * i,j * ViewConfig.PIECE_SIZE);
+                    }
+                } else if(i==board.length/2 && j == board[i].length/2)
+                    gc.drawImage(center, ViewConfig.PIECE_SIZE * i,j * ViewConfig.PIECE_SIZE);
+            }
+        }
     }
 
 }

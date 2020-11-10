@@ -37,7 +37,6 @@ public class NumberTextField extends TextField {
      * @return True if the text either contains an Integer or is blank.
      */
     private boolean validate(@NotNull String text) {
-        //TODO
         if(text.isEmpty())
             return true;
         try {

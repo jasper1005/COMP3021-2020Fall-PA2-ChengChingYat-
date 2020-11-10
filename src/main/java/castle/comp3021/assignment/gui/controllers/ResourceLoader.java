@@ -4,9 +4,7 @@ import castle.comp3021.assignment.protocol.exception.ResourceNotFoundException;
 import javafx.scene.image.Image;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 
 /**
  * Helper class for loading resources from the filesystem.
@@ -19,8 +17,6 @@ public class ResourceLoader {
     private static final Path RES_PATH;
 
     static {
-        // TODO: Initialize RES_PATH
-        // replace null to the actual path
         RES_PATH = Paths.get("src","main","resources");
     }
 
@@ -33,7 +29,6 @@ public class ResourceLoader {
      */
     @NotNull
     public static String getResource(@NotNull final String relativePath) {
-        // TODO
         Path p = RES_PATH.resolve(relativePath);
         if(!Files.exists(p))
             throw new ResourceNotFoundException("resource not found");
@@ -54,15 +49,14 @@ public class ResourceLoader {
      */
     @NotNull
     public static Image getImage(char typeChar) {
-        // TODO
         switch (typeChar) {
-            case 'K':return new Image(getResource("assets/images/whiteK.png"),true);
-            case 'A':return new Image(getResource("assets/images/whiteA.png"),true);
-            case 'a':return new Image(getResource("assets/images/blackA.png"),true);
-            case 'k':return new Image(getResource("assets/images/blackK.png"),true);
-            case 'c':return new Image(getResource("assets/images/center.png"),true);
-            case 'l':return new Image(getResource("assets/images/lightBoard.png"),true);
-            case 'd':return new Image(getResource("assets/images/darkBoard.png"),true);
+            case 'K':return new Image("file://"+getResource("assets/images/whiteK.png"),false);
+            case 'A':return new Image("file://"+getResource("assets/images/whiteA.png"),false);
+            case 'a':return new Image("file://"+getResource("assets/images/blackA.png"),false);
+            case 'k':return new Image("file://"+getResource("assets/images/blackK.png"),false);
+            case 'c':return new Image("file://"+getResource("assets/images/center.png"),false);
+            case 'l':return new Image("file://"+getResource("assets/images/lightBoard.png"),false);
+            case 'd':return new Image("file://"+getResource("assets/images/darkBoard.png"),false);
         }
         return null;
     }

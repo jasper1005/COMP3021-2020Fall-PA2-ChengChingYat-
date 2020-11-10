@@ -1,10 +1,10 @@
 package castle.comp3021.assignment.protocol;
 
-import castle.comp3021.assignment.piece.Archer;
-import castle.comp3021.assignment.piece.Knight;
-import castle.comp3021.assignment.player.ConsolePlayer;
-import castle.comp3021.assignment.player.RandomPlayer;
-import castle.comp3021.assignment.protocol.exception.InvalidConfigurationError;
+        import castle.comp3021.assignment.piece.Archer;
+        import castle.comp3021.assignment.piece.Knight;
+        import castle.comp3021.assignment.player.ConsolePlayer;
+        import castle.comp3021.assignment.player.RandomPlayer;
+        import castle.comp3021.assignment.protocol.exception.InvalidConfigurationError;
 
 
 /**
@@ -183,7 +183,6 @@ public class Configuration implements Cloneable {
      * @return boolean
      */
     public boolean isFirstPlayerHuman(){
-        //TODO
         return players.length >= 0 && players[0] instanceof ConsolePlayer;
     }
 
@@ -192,7 +191,6 @@ public class Configuration implements Cloneable {
      * @return boolean
      */
     public boolean isSecondPlayerHuman(){
-        //TODO
         return players.length > 1 && players[1] instanceof ConsolePlayer;
     }
 
@@ -201,7 +199,6 @@ public class Configuration implements Cloneable {
      * @param isHuman whether the first is human or not
      */
     public void setFirstPlayerHuman(boolean isHuman){
-        //TODO
         if(isHuman)
             players[0] = new ConsolePlayer("White");
         else
@@ -213,7 +210,6 @@ public class Configuration implements Cloneable {
      * @param isHuman whether the second is human or not
      */
     public void setSecondPlayerHuman(boolean isHuman){
-        //TODO
         if(isHuman)
             players[1] = new ConsolePlayer("Black");
         else
@@ -263,7 +259,6 @@ public class Configuration implements Cloneable {
      */
     @Override
     public String toString() {
-        // TODO
         StringBuilder builder = new StringBuilder();
         builder.append("#Game setting");
         builder.append("size:"+size+"\n");
@@ -278,4 +273,17 @@ public class Configuration implements Cloneable {
         }
         return builder.toString();
     }
+
+    public void boardReset() {
+        this.initialBoard = new Piece[size][];
+        for (int x = 0; x < size; x++) {
+            this.initialBoard[x] = new Piece[size];
+            for (int y = 0; y < size; y++) {
+                this.initialBoard[x][y] = null;
+            }
+        }
+        setAllInitialPieces();
+
+    }
 }
+

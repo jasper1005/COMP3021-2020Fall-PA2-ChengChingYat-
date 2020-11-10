@@ -48,7 +48,6 @@ public class MoveRecord implements Cloneable {
      */
     @Override
     public String toString() {
-        //TODO
         String ret = "#Move records\n";
         ret += "player:" + player.getName() + "; ";
         ret += String.format("move:(%d,%d)->(%d,%d)\n",move.getSource().x(),move.getSource().y(),

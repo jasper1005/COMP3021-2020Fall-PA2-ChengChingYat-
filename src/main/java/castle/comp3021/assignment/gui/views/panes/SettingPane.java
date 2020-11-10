@@ -62,6 +62,7 @@ public class SettingPane extends BasePane {
 
 
     public SettingPane() {
+        fillValues();
         connectComponents();
         styleComponents();
         setCallbacks();
@@ -72,7 +73,6 @@ public class SettingPane extends BasePane {
      */
     @Override
     void connectComponents() {
-        //TODO
         leftContainer.getChildren().addAll(title,sizeBox,numMovesProtectionBox,durationBox,
                 isHumanPlayer1Button,isHumanPlayer2Button,toggleSoundButton,saveButton,returnButton);
         centerContainer.getChildren().add(infoText);
@@ -103,7 +103,6 @@ public class SettingPane extends BasePane {
      */
     @Override
     void setCallbacks() {
-        //TODO
         isHumanPlayer1Button.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -148,7 +147,6 @@ public class SettingPane extends BasePane {
      * Fill in the default values for all editable fields.
      */
     private void fillValues() {
-        // TODO
         sizeFiled.setText(String.valueOf(globalConfiguration.getSize()));
         numMovesProtectionField.setText(String.valueOf(globalConfiguration.getNumMovesProtection()));
         durationField.setText(String.valueOf(DurationTimer.getDefaultEachRound()));
@@ -163,7 +161,6 @@ public class SettingPane extends BasePane {
      * @param writeBack Whether to save the values present in the text fields to their respective classes.
      */
     private void returnToMainMenu(final boolean writeBack) {
-        //TODO
         if(writeBack){
             var size = getValue(sizeFiled,0);
             var numProtected = getValue(numMovesProtectionField,-1);
@@ -193,7 +190,6 @@ public class SettingPane extends BasePane {
      *      * otherwise.
      */
     public static Optional<String> validate(int size, int numProtection, int duration) {
-        //TODO
         var option = GamePane.validate(size,numProtection);
         if(!option.isEmpty())
             return option;

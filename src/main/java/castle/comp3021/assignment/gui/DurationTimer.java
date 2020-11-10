@@ -1,5 +1,6 @@
 package castle.comp3021.assignment.gui;
 
+import javafx.application.Platform;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -58,23 +59,28 @@ public class DurationTimer {
      *  - You may need to use {@link Timer#scheduleAtFixedRate(TimerTask, long, long)}
      */
     void start() {
-        //TODO
-        flowTimer.scheduleAtFixedRate(new TimerTask() {
+        TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
-                for(var callback : onTickCallbacks) {
-                    callback.run();
+                ticksElapsed++;
+                for (Runnable callBack : onTickCallbacks) {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Platform.runLater(callBack);
+                        }
+                    }).start();
                 }
             }
-        },0,1);
+        };
+        flowTimer.scheduleAtFixedRate(timerTask,0,1000);
     }
 
     /**
      * Stop the timer
      */
     void stop() {
-        //TODO
-        flowTimer.cancel();
+        flowTimer.cancel();;
     }
 
 }

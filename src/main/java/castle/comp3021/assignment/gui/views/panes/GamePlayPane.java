@@ -3,12 +3,17 @@ package castle.comp3021.assignment.gui.views.panes;
 import castle.comp3021.assignment.gui.DurationTimer;
 import castle.comp3021.assignment.gui.FXJesonMor;
 import castle.comp3021.assignment.gui.ViewConfig;
+import castle.comp3021.assignment.gui.controllers.AudioManager;
+import castle.comp3021.assignment.gui.controllers.ResourceLoader;
+import castle.comp3021.assignment.gui.controllers.SceneManager;
 import castle.comp3021.assignment.gui.views.BigButton;
 import castle.comp3021.assignment.gui.views.BigVBox;
 import castle.comp3021.assignment.gui.views.GameplayInfoPane;
 import castle.comp3021.assignment.gui.views.SideMenuVBox;
+import castle.comp3021.assignment.piece.*;
 import castle.comp3021.assignment.protocol.*;
 import castle.comp3021.assignment.gui.controllers.Renderer;
+import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.Insets;
@@ -17,9 +22,13 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.shape.ArcType;
 import javafx.scene.text.Text;
 import org.jetbrains.annotations.NotNull;
 import javafx.scene.paint.Color;
+
+import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * This class implements the main playing function of Jeson Mor
@@ -67,6 +76,7 @@ public class GamePlayPane extends BasePane {
     @NotNull
     private final ScrollPane scrollPane = new ScrollPane();
 
+
     /**
      * time passed in seconds
      * Hint:
@@ -75,7 +85,7 @@ public class GamePlayPane extends BasePane {
     private final IntegerProperty ticksElapsed = new SimpleIntegerProperty();
 
     @NotNull
-    private final Canvas gamePlayCanvas = new Canvas();
+    private final Canvas gamePlayCanvas = new Canvas(300,200);
 
     private GameplayInfoPane infoPane = null;
 
@@ -85,8 +95,13 @@ public class GamePlayPane extends BasePane {
      *      - the passed in {@link FXJesonMor}
      *      - other global variable you want to note down.
      */
-    // TODO
     FXJesonMor jesonMor = null;
+    int srcX;
+    int srcY;
+    boolean confirmEnd;
+    boolean winnerExist;
+    Player playerCurrent = null;
+    Move lastValidMove = null;
 
 
     public GamePlayPane() {
@@ -100,13 +115,11 @@ public class GamePlayPane extends BasePane {
      */
     @Override
     void connectComponents() {
-        //TODO
         topBar.getChildren().add(title);
         historyFiled.setEditable(false);
         historyFiled.setPrefSize(100,200);
         historyFiled.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         leftContainer.getChildren().addAll(parameterText,historyLabel, historyFiled,startButton,restartButton,returnButton);
-        centerContainer.getChildren().add(gamePlayCanvas);
         setTop(topBar);
         setLeft(leftContainer);
         setCenter(centerContainer);
@@ -133,7 +146,7 @@ public class GamePlayPane extends BasePane {
         gamePlayCanvas.setOnMousePressed(this::onCanvasPressed);
         gamePlayCanvas.setOnMouseDragged(this::onCanvasDragged);
         gamePlayCanvas.setOnMouseReleased(this::onCanvasReleased);
-        //returnButton.setOnAction(e -> ());
+        returnButton.setOnAction(e -> doQuitToMenuAction());
         //TODO
     }
 
@@ -148,19 +161,34 @@ public class GamePlayPane extends BasePane {
      * @param fxJesonMor pass in an instance of {@link FXJesonMor}
      */
     void initializeGame(@NotNull FXJesonMor fxJesonMor) {
-        //TODO
         jesonMor = fxJesonMor;
-        if(infoPane != null)
-            centerContainer.getChildren().remove(infoPane);
-        infoPane = new GameplayInfoPane(jesonMor.getPlayer1Score(),jesonMor.getPlayer2Score(),jesonMor.getCurPlayerName(),ticksElapsed);
-        centerContainer.getChildren().add(infoPane);
+        jesonMor.getConfiguration().setAllInitialPieces();
+
         startButton.setDisable(false);
         restartButton.setDisable(true);
         parameterText.setText(getParamters(jesonMor.getConfiguration()));
+
+        double edgeSize = ResourceLoader.getImage('l').getHeight()*jesonMor.getConfiguration().getSize();
+        gamePlayCanvas.setHeight(edgeSize);
+        gamePlayCanvas.setWidth(edgeSize);
         jesonMor.renderBoard(gamePlayCanvas);
-        gamePlayCanvas.setHeight(100);
-        gamePlayCanvas.setWidth(200);
-        enableCanvas();
+
+        centerContainer.getChildren().clear();
+        infoPane = new GameplayInfoPane(jesonMor.getPlayer1Score(),jesonMor.getPlayer2Score(),jesonMor.getCurPlayerName(),ticksElapsed);
+
+        centerContainer.getChildren().add(gamePlayCanvas);
+        centerContainer.getChildren().add(infoPane);
+
+        disnableCanvas();
+
+        fxJesonMor.addOnTickHandler(new Runnable() {
+            private IntegerProperty ticksProperty;
+            {
+                this.ticksProperty = ticksElapsed;
+            }
+            @Override public void run() {
+                ticksElapsed.setValue(ticksElapsed.getValue()+1);
+            }});
     }
 
     private String getParamters(Configuration configuration) {
@@ -201,7 +229,11 @@ public class GamePlayPane extends BasePane {
      *          - or you can take advantage of timer to automatically change player. (Bonus)
      */
     public void startGame() {
-        //TODO
+        jesonMor.startCountdown();
+        startButton.setDisable(true);
+        enableCanvas();
+        restartButton.setDisable(false);
+        playerCurrent = jesonMor.getCurrentPlayer();
     }
 
     /**
@@ -209,7 +241,12 @@ public class GamePlayPane extends BasePane {
      * Hint: end the current game and start a new game
      */
     private void onRestartButtonClick(){
-        //TODO
+        disnableCanvas();
+        startButton.setDisable(false);
+        restartButton.setDisable(true);
+        jesonMor.getConfiguration().setAllInitialPieces();
+        historyFiled.clear();
+        initializeGame(new FXJesonMor(jesonMor.getConfiguration()));
     }
 
     /**
@@ -222,7 +259,10 @@ public class GamePlayPane extends BasePane {
      * @param event mouse click
      */
     private void onCanvasPressed(MouseEvent event){
-        // TODO
+        gamePlayCanvas.getGraphicsContext2D().save();
+        Renderer.drawRectangle(gamePlayCanvas.getGraphicsContext2D(), toBoardCoordinate(event.getX()),toBoardCoordinate(event.getY()));
+        srcX = toBoardCoordinate(event.getX());
+        srcY = toBoardCoordinate(event.getY());
     }
 
     /**
@@ -233,7 +273,7 @@ public class GamePlayPane extends BasePane {
      * @param event mouse position
      */
     private void onCanvasDragged(MouseEvent event){
-        //TODO
+        Renderer.drawOval(gamePlayCanvas.getGraphicsContext2D(), event.getX(),event.getY());
     }
 
     /**
@@ -245,14 +285,134 @@ public class GamePlayPane extends BasePane {
      * @param event mouse release
      */
     private void onCanvasReleased(MouseEvent event){
-        // TODO
+        gamePlayCanvas.getGraphicsContext2D().clearRect(0,0,gamePlayCanvas.getWidth(),gamePlayCanvas.getHeight());
+        jesonMor.renderBoard(gamePlayCanvas);
+
+        Player currPlayer = jesonMor.getCurrentPlayer();
+        Move[] availableMoves = jesonMor.getAvailableMoves(jesonMor.getCurrentPlayer());
+        Move movePending = new Move(srcX,srcY,toBoardCoordinate(event.getX()),toBoardCoordinate(event.getY()));
+        Move lastValidMove = Arrays.stream(availableMoves).filter((move)->move.equals(movePending)).findFirst().orElse(null);
+        String errorMsg = validateMove(jesonMor,movePending);
+        if (errorMsg == null && lastValidMove != null){
+            jesonMor.movePiece(lastValidMove);
+            jesonMor.incMove();
+            jesonMor.updateScore(currPlayer,jesonMor.getPiece(lastValidMove.getDestination()), lastValidMove);
+            updateHistoryField(lastValidMove);
+            checkWinner();
+        } else {
+            showInvalidMoveMsg(errorMsg);
+        }
+
+        jesonMor.renderBoard(gamePlayCanvas);
+
+        currPlayer = jesonMor.getCurrentPlayer();
+        jesonMor.getCurPlayerName().setValue(currPlayer.getName());
+
+        if (currPlayer.getName().equals("White")){
+            if (globalConfiguration.isFirstPlayerHuman()) {
+                enableCanvas();
+            }else{
+                disnableCanvas();
+                availableMoves = jesonMor.getAvailableMoves(currPlayer);
+                lastValidMove = currPlayer.nextMove(jesonMor, availableMoves);
+                if (lastValidMove != null){
+                    jesonMor.movePiece(lastValidMove);
+                    jesonMor.incMove();
+                    jesonMor.updateScore(currPlayer,jesonMor.getPiece(lastValidMove.getDestination()), lastValidMove);
+                    updateHistoryField(lastValidMove);
+                    checkWinner();
+                    // check winner
+                } else {
+                    // computer lose
+                }
+                jesonMor.renderBoard(gamePlayCanvas);
+                enableCanvas();
+                jesonMor.getCurPlayerName().setValue(currPlayer.getName());
+            }
+        }else{
+            if (globalConfiguration.isSecondPlayerHuman()) {
+                enableCanvas();
+            }else{
+                disnableCanvas();
+                availableMoves = jesonMor.getAvailableMoves(currPlayer);
+                lastValidMove = currPlayer.nextMove(jesonMor, availableMoves);
+                if (lastValidMove != null){
+                    jesonMor.movePiece(lastValidMove);
+                    jesonMor.incMove();
+                    jesonMor.updateScore(currPlayer,jesonMor.getPiece(lastValidMove.getDestination()), lastValidMove);
+                    updateHistoryField(lastValidMove);
+                    checkWinner();
+                } else {
+                    //TODO
+                }
+                jesonMor.renderBoard(gamePlayCanvas);
+                enableCanvas();
+                jesonMor.getCurPlayerName().setValue(currPlayer.getName());
+            }
+        }
+    }
+
+    private String validateMove(Game game, Move move) {
+        Rule rules[];
+        if (game.getPiece(move.getSource()).getLabel() == 'K'){
+            rules = new Rule[]{
+                    new OutOfBoundaryRule(),
+                    new OccupiedRule(),
+                    new VacantRule(),
+                    new NilMoveRule(),
+                    new FirstNMovesProtectionRule(game.getConfiguration().getNumMovesProtection()),
+                    new KnightMoveRule(),
+                    new KnightBlockRule(),
+            };
+        }else{
+            rules = new Rule[]{
+                    new OutOfBoundaryRule(),
+                    new OccupiedRule(),
+                    new VacantRule(),
+                    new NilMoveRule(),
+                    new FirstNMovesProtectionRule(game.getConfiguration().getNumMovesProtection()),
+                    new ArcherMoveRule(),
+            };
+        }
+        for (var rule :
+                rules) {
+            if (!rule.validate(game, move)) {
+                return rule.getDescription();
+            }
+        }
+        boolean isHumanPlayer = (game.getCurrentPlayer() == game.getConfiguration().getPlayers()[0] ? game.getConfiguration().isFirstPlayerHuman()  : game.getConfiguration().isSecondPlayerHuman());
+        if (game.getPiece(move.getSource()).getPlayer() != game.getCurrentPlayer() || !isHumanPlayer){
+            return "The piece you moved does not belong to you!";
+        }
+        return null;
     }
 
     /**
      * Creates a popup which tells the winner
      */
     private void createWinPopup(String winnerName){
-        //TODO
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Congratulations!");
+        alert.setHeaderText("Confirm");
+        alert.setContentText(winnerName+" wins!");
+
+        alert.show();
+
+        ButtonType btnType1 = new ButtonType("Start New Game");
+        ButtonType btnType2 = new ButtonType("Export Move Records");
+        ButtonType btnType3 = new ButtonType("Return to Main Menu");
+
+        alert.getButtonTypes().setAll(btnType1, btnType2, btnType3);
+
+        Optional result = alert.showAndWait();
+        if (result.get() == btnType1) {
+            startGame();
+        } else if (result.get() == btnType2) {
+            //TODO
+        } else {
+            endGame();
+            doQuitToMenu();
+        }
     }
 
 
@@ -272,7 +432,11 @@ public class GamePlayPane extends BasePane {
      * @param errorMsg error string stating why this move is invalid
      */
     private void showInvalidMoveMsg(String errorMsg){
-        //TODO
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Invalid Move");
+        alert.setHeaderText("Your movement is invalid due to follow reason(s):");
+        alert.setContentText(errorMsg);
+        alert.showAndWait();
     }
 
     /**
@@ -286,7 +450,15 @@ public class GamePlayPane extends BasePane {
      *  If click Cancle, than do nothing.
      */
     private void doQuitToMenuAction() {
-        // TODO
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirm");
+        alert.setHeaderText("Return to menu?");
+        alert.setContentText("Game progress will be lost");
+
+        Optional result = alert.showAndWait();
+        if (result.get() == ButtonType.OK) {
+            doQuitToMenu();
+        }
     }
 
     /**
@@ -294,7 +466,7 @@ public class GamePlayPane extends BasePane {
      * @param move the last move that has been made
      */
     private void updateHistoryField(Move move){
-        //TODO
+        historyFiled.appendText(move.getSource()+"->"+move.getDestination()+"\n");
     }
 
     /**
@@ -302,7 +474,8 @@ public class GamePlayPane extends BasePane {
      * Hint: before quit, you need to end the game
      */
     private void doQuitToMenu() {
-        // TODO
+        endGame();
+        SceneManager.getInstance().showPane(MainMenuPane.class);
     }
 
     /**
@@ -313,8 +486,7 @@ public class GamePlayPane extends BasePane {
      * @return the coordinate on board
      */
     private int toBoardCoordinate(double x){
-        // TODO
-        return 0;
+        return (int)(x / ViewConfig.PIECE_SIZE);
     }
 
     /**
@@ -326,6 +498,17 @@ public class GamePlayPane extends BasePane {
      *
      */
     private void endGame() {
-        //TODO
+        globalConfiguration.boardReset();
+        winnerExist = false;
+        confirmEnd = true;
+        globalConfiguration.getPlayers()[0].setScore(0);
+        globalConfiguration.getPlayers()[1].setScore(0);
+        jesonMor.resetGame();
+        jesonMor.renderBoard(gamePlayCanvas);
+        historyFiled.setText("");
+        ticksElapsed.setValue(0);
+        disnableCanvas();
+        startButton.setDisable(false);
+        restartButton.setDisable(true);
     }
 }

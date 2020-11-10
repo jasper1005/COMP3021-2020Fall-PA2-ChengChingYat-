@@ -6,8 +6,10 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-//import castle.comp3021.assignment.gui.views.panes.*;
 
+import java.io.File;
+import java.net.URL;
+import java.nio.file.Files;
 import java.util.Map;
 
 /**
@@ -67,7 +69,6 @@ public class SceneManager {
      * Add CSS styles to every scene
      */
     private SceneManager() {
-        //TODO
         var cssUrl = "file:///" + ViewConfig.CSS_STYLES_PATH;
         mainMenuScene.getStylesheets().add("file:///" + ViewConfig.CSS_STYLES_PATH);
         settingsScene.getStylesheets().add("file:///" + ViewConfig.CSS_STYLES_PATH);
@@ -116,7 +117,6 @@ public class SceneManager {
      *
      */
     public void showPane(@NotNull final Class<? extends BasePane> pane) {
-        //TODO
         Scene scene = scenes.get(pane);
         if(scene == null)
             throw new IllegalArgumentException("illegal argument exception");

@@ -32,7 +32,7 @@ public class Serializer {
      * @throws IOException if an I/O exception has occurred.
      */
     public void saveToFile(FXJesonMor fxJesonMor) throws IOException {
-        //TODO
+
     }
 
 }

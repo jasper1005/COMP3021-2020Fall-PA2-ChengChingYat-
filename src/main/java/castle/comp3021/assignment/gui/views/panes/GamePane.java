@@ -45,7 +45,6 @@ public class GamePane extends BasePane {
     @NotNull
     private final BorderPane numMovesProtectionBox = new BorderPane(null, null, numMovesProtectionField, null, new Label("Protection Moves:"));
 
-
     private FXJesonMor fxJesonMor = null;
 
     public GamePane() {
@@ -57,7 +56,6 @@ public class GamePane extends BasePane {
 
     @Override
     void connectComponents() {
-        //TODO
         container.getChildren().addAll(title,sizeBox,numMovesProtectionBox,
                 isHumanPlayer1Button,isHumanPlayer2Button,useDefaultButton,playButton,returnButton);
         setCenter(container);
@@ -81,7 +79,6 @@ public class GamePane extends BasePane {
      */
     @Override
     void setCallbacks() {
-        //TODO
         useDefaultButton.setOnAction(e -> fillValues());
         returnButton.setOnAction(e -> SceneManager.getInstance().showPane(MainMenuPane.class));
         playButton.setOnAction(e -> onClickPlay());
@@ -119,7 +116,6 @@ public class GamePane extends BasePane {
      * Fill in the default values for all editable fields.
      */
     void fillValues(){
-        // TODO
         sizeFiled.setText(String.valueOf(globalConfiguration.getSize()));
         numMovesProtectionField.setText(String.valueOf(globalConfiguration.getNumMovesProtection()));
         isHumanPlayer1Button.setText(globalConfiguration.isFirstPlayerHuman()?player1HumanStr:player1Computer);
@@ -135,7 +131,7 @@ public class GamePane extends BasePane {
      *      * otherwise.
      */
     public static Optional<String> validate(int size, int numProtection) {
-        //TODO
+        // validate size
         if (size < 3) {
             return Optional.of(ViewConfig.MSG_BAD_SIZE_NUM);
         }

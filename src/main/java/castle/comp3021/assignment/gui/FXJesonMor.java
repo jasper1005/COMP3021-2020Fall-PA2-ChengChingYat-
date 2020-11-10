@@ -28,9 +28,12 @@ public class FXJesonMor extends JesonMor {
      * @param configuration
      */
     public FXJesonMor(Configuration configuration){
-        //TODO
         super(configuration);
         durationTimer = new DurationTimer();
+    }
+
+    public void incMove(){
+        ++numMoves;
     }
 
     /**
@@ -40,7 +43,6 @@ public class FXJesonMor extends JesonMor {
      * @param canvas render the given canvas
      */
     public void renderBoard(@NotNull Canvas canvas){
-        //TODO
         Renderer.renderChessBoard(canvas,configuration.getSize(),configuration.getCentralPlace());
         Renderer.renderPieces(canvas,configuration.getInitialBoard());
     }
@@ -81,6 +83,9 @@ public class FXJesonMor extends JesonMor {
         return scorePlayer2Property;
     }
 
+    public void setCurrentPlayerNameProperty(String value){
+        currentPlayerNameProperty.setValue(value);
+    }
     /**
      * Update the score of a player according to the piece and corresponding move made by him just now.
      *
@@ -96,10 +101,31 @@ public class FXJesonMor extends JesonMor {
         player.setScore(player.getScore() + newScore);
 
         // update score to 2 properties
-        // TODO: update scorePlayer1Property and scorePlayer2Property
         if(player == configuration.getPlayers()[0])
-            scorePlayer1Property.set(newScore);
+            scorePlayer1Property.set(player.getScore());
         else
-            scorePlayer2Property.set(newScore);
+            scorePlayer2Property.set(player.getScore());
+    }
+
+    public void resetGame(){
+        scorePlayer2Property.setValue(0);
+        scorePlayer1Property.setValue(0);
+        currentPlayerNameProperty.setValue(getCurrentPlayer().getName());
+        configuration.getPlayers()[1].setScore(0);
+        configuration.getPlayers()[0].setScore(0);
+        durationTimer.stop();
+        for (int i = 0; i < configuration.getSize(); i++) {
+            for (int j = 0; j < configuration.getSize(); j++)
+                System.out.print((board[j][i] != null ? board[j][i].getLabel() : "."));
+            System.out.println();
+        }
+        for (int i = 0; i < configuration.getSize(); i++) {
+            for (int j = 0; j < configuration.getSize(); j++)
+                System.out.print((configuration.getInitialBoard()[j][i] != null ? configuration.getInitialBoard()[j][i].getLabel() : "."));
+            System.out.println();
+        }
+        resetMoveRecords();
+        numMoves = 0;
+        board = configuration.getInitialBoard();
     }
 }

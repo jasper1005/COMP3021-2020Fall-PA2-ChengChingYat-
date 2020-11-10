@@ -32,7 +32,6 @@ public class MainMenuPane extends BasePane {
 
     @Override
     void connectComponents() {
-        // TODO
         container.getChildren().addAll(title,playButton,settingsButton,validationButtion,quitButton);
         setCenter(container);
     }
@@ -55,7 +54,6 @@ public class MainMenuPane extends BasePane {
      */
     @Override
     void setCallbacks() {
-        //TODO
         playButton.setOnAction(e -> showPlayPane());
         settingsButton.setOnAction(e -> SceneManager.getInstance().showPane(SettingPane.class));
         validationButtion.setOnAction(e -> SceneManager.getInstance().showPane(ValidationPane.class));

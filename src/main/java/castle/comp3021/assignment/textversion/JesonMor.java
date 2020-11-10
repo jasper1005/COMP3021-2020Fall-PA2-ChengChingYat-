@@ -118,6 +118,10 @@ public class JesonMor extends Game {
         return winner;
     }
 
+    public void resetMoveRecords(){
+        moveRecords.clear();
+    }
+
     /**
      * Update the score of a player according to the piece and corresponding move made by him just now.
      *

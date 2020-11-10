@@ -1,9 +1,11 @@
 package castle.comp3021.assignment.gui.controllers;
 
+import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Handles audio related events.
@@ -62,8 +64,15 @@ public class AudioManager {
      * @param name the name of the sound file to be played, excluding .mp3
      */
     private void playFile(final String name) {
-        //TODO
-
+        if (enabled == false) return;
+        Media music = new Media(ResourceLoader.getResource("/assets/audio/"+name+".mp3"));
+        MediaPlayer mediaPlayer =  new MediaPlayer(music);
+        mediaPlayer.setOnEndOfMedia(()->{
+            mediaPlayer.dispose();
+            soundPool.remove(mediaPlayer);
+        });
+        soundPool.add(mediaPlayer);
+        mediaPlayer.play();
     }
 
     /**
@@ -72,6 +81,23 @@ public class AudioManager {
      * @param name Enumeration of the sound, given by {@link SoundRes}.
      */
     public void playSound(final SoundRes name) {
-        playFile(name.toString());
+        String fileName = "";
+        switch (name){
+            case PLACE:
+                fileName = "place";
+                break;
+            case LOSE:
+                fileName = "lose";
+                break;
+            case WIN:
+                fileName = "win";
+                break;
+            case CLICK:
+                fileName = "click";
+                break;
+            default:
+                break;
+        }
+        playFile(fileName.toString());
     }
 }

@@ -33,6 +33,7 @@ public abstract class BasePane extends BorderPane {
         alert.setContentText(content);
         alert.showAndWait();
     }
+
     /**
      * Shared configuration by all panes
      */
