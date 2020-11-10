@@ -63,6 +63,12 @@ public class ValidationPane extends BasePane{
     @Override
     void connectComponents() {
         // TODO
+        validationButton.setDisable(true);
+        replayButton.setDisable(true);
+        leftContainer.getChildren().addAll(title,explanation,loadButton,validationButton,replayButton,returnButton);
+        centerContainer.getChildren().addAll(gamePlayCanvas);
+        setLeft(leftContainer);
+        setCenter(centerContainer);
     }
 
     @Override
@@ -78,6 +84,9 @@ public class ValidationPane extends BasePane{
     @Override
     void setCallbacks() {
         //TODO
+        returnButton.setOnAction(e -> returnToMainMenu());
+        replayButton.setOnAction(e -> onClickReplayButton());
+        validationButton.setOnAction(e -> onClickValidationButton());
     }
 
     /**

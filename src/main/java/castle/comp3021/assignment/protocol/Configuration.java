@@ -2,6 +2,7 @@ package castle.comp3021.assignment.protocol;
 
 import castle.comp3021.assignment.piece.Archer;
 import castle.comp3021.assignment.piece.Knight;
+import castle.comp3021.assignment.player.ConsolePlayer;
 import castle.comp3021.assignment.player.RandomPlayer;
 import castle.comp3021.assignment.protocol.exception.InvalidConfigurationError;
 
@@ -183,7 +184,7 @@ public class Configuration implements Cloneable {
      */
     public boolean isFirstPlayerHuman(){
         //TODO
-        return false;
+        return players.length >= 0 && players[0] instanceof ConsolePlayer;
     }
 
     /**
@@ -192,7 +193,7 @@ public class Configuration implements Cloneable {
      */
     public boolean isSecondPlayerHuman(){
         //TODO
-        return false;
+        return players.length > 1 && players[1] instanceof ConsolePlayer;
     }
 
     /**
@@ -201,6 +202,10 @@ public class Configuration implements Cloneable {
      */
     public void setFirstPlayerHuman(boolean isHuman){
         //TODO
+        if(isHuman)
+            players[0] = new ConsolePlayer("White");
+        else
+            players[0] = new RandomPlayer("White");
     }
 
     /**
@@ -209,6 +214,10 @@ public class Configuration implements Cloneable {
      */
     public void setSecondPlayerHuman(boolean isHuman){
         //TODO
+        if(isHuman)
+            players[1] = new ConsolePlayer("Black");
+        else
+            players[1] = new RandomPlayer("Black");
     }
 
 
@@ -255,6 +264,18 @@ public class Configuration implements Cloneable {
     @Override
     public String toString() {
         // TODO
-        return "";
+        StringBuilder builder = new StringBuilder();
+        builder.append("#Game setting");
+        builder.append("size:"+size+"\n");
+        builder.append("numMovesProtection:"+numMovesProtection+"\n");
+        builder.append("centralPlace:"+centralPlace+"\n");
+        builder.append("numPlayers:"+players.length+"\n\n");
+
+        builder.append("#Player info\n");
+        for(int i = 0;i<players.length;++i){
+            builder.append("#player"+(i+1)+":\n");
+            builder.append("name:"+players[i].getName()+"; score:"+players[i].getScore()+"\n");
+        }
+        return builder.toString();
     }
 }

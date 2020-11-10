@@ -33,6 +33,8 @@ public class MainMenuPane extends BasePane {
     @Override
     void connectComponents() {
         // TODO
+        container.getChildren().addAll(title,playButton,settingsButton,validationButtion,quitButton);
+        setCenter(container);
     }
 
     /**
@@ -54,6 +56,15 @@ public class MainMenuPane extends BasePane {
     @Override
     void setCallbacks() {
         //TODO
+        playButton.setOnAction(e -> showPlayPane());
+        settingsButton.setOnAction(e -> SceneManager.getInstance().showPane(SettingPane.class));
+        validationButtion.setOnAction(e -> SceneManager.getInstance().showPane(ValidationPane.class));
+        quitButton.setOnAction(e -> Platform.exit());
+    }
+
+    void showPlayPane() {
+        SceneManager.getInstance().<GamePane>getPane(GamePane.class).fillValues();
+        SceneManager.getInstance().showPane(GamePane.class);
     }
 
 }

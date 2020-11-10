@@ -11,14 +11,15 @@ import castle.comp3021.assignment.protocol.*;
 import castle.comp3021.assignment.gui.controllers.Renderer;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.geometry.Pos;
+import javafx.geometry.Insets;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import org.jetbrains.annotations.NotNull;
+import javafx.scene.paint.Color;
 
 /**
  * This class implements the main playing function of Jeson Mor
@@ -39,7 +40,7 @@ import org.jetbrains.annotations.NotNull;
  *      - If one player runs out of time of each round {@link DurationTimer#getDefaultEachRound()}, then the player loses the game.
  * Hint:
  *      - You may find it useful to synchronize javafx UI-thread using {@link javafx.application.Platform#runLater}
- */ 
+ */
 
 public class GamePlayPane extends BasePane {
     @NotNull
@@ -62,7 +63,7 @@ public class GamePlayPane extends BasePane {
     private final Label historyLabel = new Label("History");
 
     @NotNull
-    private final Text historyFiled = new Text();
+    private final TextArea historyFiled = new TextArea("");
     @NotNull
     private final ScrollPane scrollPane = new ScrollPane();
 
@@ -85,6 +86,7 @@ public class GamePlayPane extends BasePane {
      *      - other global variable you want to note down.
      */
     // TODO
+    FXJesonMor jesonMor = null;
 
 
     public GamePlayPane() {
@@ -99,6 +101,15 @@ public class GamePlayPane extends BasePane {
     @Override
     void connectComponents() {
         //TODO
+        topBar.getChildren().add(title);
+        historyFiled.setEditable(false);
+        historyFiled.setPrefSize(100,200);
+        historyFiled.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+        leftContainer.getChildren().addAll(parameterText,historyLabel, historyFiled,startButton,restartButton,returnButton);
+        centerContainer.getChildren().add(gamePlayCanvas);
+        setTop(topBar);
+        setLeft(leftContainer);
+        setCenter(centerContainer);
     }
 
     /**
@@ -117,6 +128,12 @@ public class GamePlayPane extends BasePane {
      */
     @Override
     void setCallbacks() {
+        startButton.setOnAction(e -> startGame());
+        restartButton.setOnAction(e -> onRestartButtonClick());
+        gamePlayCanvas.setOnMousePressed(this::onCanvasPressed);
+        gamePlayCanvas.setOnMouseDragged(this::onCanvasDragged);
+        gamePlayCanvas.setOnMouseReleased(this::onCanvasReleased);
+        //returnButton.setOnAction(e -> ());
         //TODO
     }
 
@@ -132,6 +149,26 @@ public class GamePlayPane extends BasePane {
      */
     void initializeGame(@NotNull FXJesonMor fxJesonMor) {
         //TODO
+        jesonMor = fxJesonMor;
+        if(infoPane != null)
+            centerContainer.getChildren().remove(infoPane);
+        infoPane = new GameplayInfoPane(jesonMor.getPlayer1Score(),jesonMor.getPlayer2Score(),jesonMor.getCurPlayerName(),ticksElapsed);
+        centerContainer.getChildren().add(infoPane);
+        startButton.setDisable(false);
+        restartButton.setDisable(true);
+        parameterText.setText(getParamters(jesonMor.getConfiguration()));
+        jesonMor.renderBoard(gamePlayCanvas);
+        gamePlayCanvas.setHeight(100);
+        gamePlayCanvas.setWidth(200);
+        enableCanvas();
+    }
+
+    private String getParamters(Configuration configuration) {
+        return "Paramters:\n\n" +
+                "Size of board: " + configuration.getSize() + "\n" +
+                "Num of protection moves: " + configuration.getNumMovesProtection()  + "\n" +
+                "Player " + configuration.getPlayers()[0].getName() + (configuration.isFirstPlayerHuman()?"(human)":"(computer)") + "\n" +
+                "Player " + configuration.getPlayers()[1].getName() + (configuration.isSecondPlayerHuman()?"(human)":"(computer)");
     }
 
     /**

@@ -2,11 +2,14 @@ package castle.comp3021.assignment.gui.views.panes;
 import castle.comp3021.assignment.gui.DurationTimer;
 import castle.comp3021.assignment.gui.ViewConfig;
 import castle.comp3021.assignment.gui.controllers.AudioManager;
+import castle.comp3021.assignment.gui.controllers.SceneManager;
 import castle.comp3021.assignment.gui.views.BigButton;
 import castle.comp3021.assignment.gui.views.BigVBox;
 import castle.comp3021.assignment.gui.views.NumberTextField;
 import castle.comp3021.assignment.gui.views.SideMenuVBox;
 import castle.comp3021.assignment.protocol.Configuration;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
@@ -70,6 +73,11 @@ public class SettingPane extends BasePane {
     @Override
     void connectComponents() {
         //TODO
+        leftContainer.getChildren().addAll(title,sizeBox,numMovesProtectionBox,durationBox,
+                isHumanPlayer1Button,isHumanPlayer2Button,toggleSoundButton,saveButton,returnButton);
+        centerContainer.getChildren().add(infoText);
+        setLeft(leftContainer);
+        setCenter(centerContainer);
     }
 
     @Override
@@ -96,6 +104,44 @@ public class SettingPane extends BasePane {
     @Override
     void setCallbacks() {
         //TODO
+        isHumanPlayer1Button.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                if(globalConfiguration.isFirstPlayerHuman()) {
+                    globalConfiguration.setFirstPlayerHuman(false);
+                    isHumanPlayer1Button.setText(player1Computer);
+                } else {
+                    globalConfiguration.setFirstPlayerHuman(true);
+                    isHumanPlayer1Button.setText(player1HumanStr);
+                }
+            }
+        });
+        isHumanPlayer2Button.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                if(globalConfiguration.isSecondPlayerHuman()) {
+                    globalConfiguration.setSecondPlayerHuman(false);
+                    isHumanPlayer2Button.setText(player2Computer);
+                } else {
+                    globalConfiguration.setSecondPlayerHuman(true);
+                    isHumanPlayer2Button.setText(player2HumanStr);
+                }
+            }
+        });
+        toggleSoundButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                if(AudioManager.getInstance().isEnabled()){
+                    AudioManager.getInstance().setEnabled(false);
+                    toggleSoundButton.setText(soundDisable);
+                } else {
+                    AudioManager.getInstance().setEnabled(true);
+                    toggleSoundButton.setText(soundEnable);
+                }
+            }
+        });
+        returnButton.setOnAction(e -> returnToMainMenu(false));
+        saveButton.setOnAction(e -> returnToMainMenu(true));
     }
 
     /**
@@ -103,6 +149,12 @@ public class SettingPane extends BasePane {
      */
     private void fillValues() {
         // TODO
+        sizeFiled.setText(String.valueOf(globalConfiguration.getSize()));
+        numMovesProtectionField.setText(String.valueOf(globalConfiguration.getNumMovesProtection()));
+        durationField.setText(String.valueOf(DurationTimer.getDefaultEachRound()));
+        isHumanPlayer1Button.setText(globalConfiguration.isFirstPlayerHuman() ? player1HumanStr : player1Computer);
+        isHumanPlayer2Button.setText(globalConfiguration.isSecondPlayerHuman() ? player2HumanStr : player2Computer);
+        toggleSoundButton.setText(AudioManager.getInstance().isEnabled() ? soundEnable:soundDisable);
     }
 
     /**
@@ -112,6 +164,23 @@ public class SettingPane extends BasePane {
      */
     private void returnToMainMenu(final boolean writeBack) {
         //TODO
+        if(writeBack){
+            var size = getValue(sizeFiled,0);
+            var numProtected = getValue(numMovesProtectionField,-1);
+            var duration = getValue(durationField, 0);
+
+            var option = validate(size,numProtected,duration);
+            if(!option.isEmpty()) {
+                popUp("Error!","Validation Failed",option.get());
+                return;
+            }
+
+            globalConfiguration.setSize(sizeFiled.getValue());
+            globalConfiguration.setNumMovesProtection(numMovesProtectionField.getValue());
+            DurationTimer.setDefaultEachRound(durationField.getValue());
+        }
+        fillValues();
+        SceneManager.getInstance().showPane(MainMenuPane.class);
     }
 
     /**
@@ -125,6 +194,14 @@ public class SettingPane extends BasePane {
      */
     public static Optional<String> validate(int size, int numProtection, int duration) {
         //TODO
-        return null;
+        var option = GamePane.validate(size,numProtection);
+        if(!option.isEmpty())
+            return option;
+
+        if (duration <= 0) {
+            return Optional.of(ViewConfig.MSG_NEG_DURATION);
+        }
+
+        return Optional.empty();
     }
 }
